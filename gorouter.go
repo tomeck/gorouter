@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -262,6 +263,7 @@ func main() {
 	// Initialize database (hardcoded for local machine)
 	client, ctx, cancel, err := connect("mongodb://localhost:27017")
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	fmt.Println("Connected to local mongodb")
@@ -275,6 +277,15 @@ func main() {
 	defer close(client, ctx, cancel)
 
 	// handle all requests to your server using the proxy
+	// Determine port for HTTP service.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		fmt.Printf("defaulting to port %s\n", port)
+	}
+
+	fmt.Printf("Listening on port %s\n", port)
+
 	http.HandleFunc("/", ProxyRequestHandler(proxy))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
