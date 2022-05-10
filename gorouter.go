@@ -17,6 +17,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// Constants
+const CHARGES_BASE_URL = "https://cert.api.fiservapps.com/"
+
+// Globals
+// JTE TODO is there something better to do with these globals?
+var client *mongo.Client
+var ctx context.Context
+var cancel context.CancelFunc
+var db *mongo.Database
+var txCollection *mongo.Collection
+
 type Transaction struct {
 	Id        primitive.ObjectID `json:"id,omitempty"`
 	ApiKey    string             `json:"apikey,omitempty" validate:"required"`
@@ -100,40 +111,6 @@ func recordTransaction(headers http.Header, Url string, status int, request []by
 	return nil
 }
 
-/*
-// This gets called when the response comes back from origin server
-// We write the request and response to database
-func rewriteBody(resp *http.Response) (err error) {
-
-	req := resp.Request
-	fmt.Println("Request %v", req)
-
-	// Get original request from response
-	requestBytes, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Request bytes %v", requestBytes)
-
-	// Read response from origin server
-	responseBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	err = resp.Body.Close()
-	if err != nil {
-		return err
-	}
-
-	// Rewrite body so client receives origin server response
-	body := ioutil.NopCloser(bytes.NewReader(responseBytes))
-	resp.Body = body
-
-	return nil
-}
-*/
-
 type myTransport struct {
 	// Uncomment this if you want to capture the transport
 	// CapturedTransport http.RoundTripper
@@ -148,7 +125,6 @@ func (t *myTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Println("Request", requestBytes)
 
 	// Rewrite body so client receives origin server response
 	body := ioutil.NopCloser(bytes.NewReader(requestBytes))
@@ -164,7 +140,6 @@ func (t *myTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Println("responseBytes bytes %v", responseBytes)
 
 	// Rewrite body so client receives origin server response
 	body = ioutil.NopCloser(bytes.NewReader(responseBytes))
@@ -188,36 +163,6 @@ func NewProxy(targetHost string) (*httputil.ReverseProxy, error) {
 	proxy.Director = func(req *http.Request) {
 		fmt.Printf("Proxying request for URL %s\n", req.URL)
 
-		/*
-			//*******
-			// JTE TEST : read headers
-			// Loop over header names
-			for name, values := range req.Header {
-				// Loop over all values for the name.
-				for _, value := range values {
-					fmt.Println(name, value)
-				}
-			}
-			//*******
-
-			//*******
-			// JTE TEST : read body
-			body, err := ioutil.ReadAll(req.Body)
-			if err != nil {
-				log.Printf("Error reading body: %v", err)
-				//http.Error(w, "can't read body", http.StatusBadRequest)
-				return
-			}
-
-			// Work / inspect body. You may even modify it!
-			fmt.Println(body)
-			//recordTransaction(req.Header, body)
-
-			// And now set a new body, which will simulate the same data we read:
-			req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-			//*******
-		*/
-
 		prevDirector(req)
 
 		req.Header.Add("X-Forwarded-Host", req.Host)
@@ -229,7 +174,6 @@ func NewProxy(targetHost string) (*httputil.ReverseProxy, error) {
 		req.Close = true
 	}
 
-	//proxy.ModifyResponse = rewriteBody
 	proxy.Transport = &myTransport{}
 
 	return proxy, nil
@@ -242,20 +186,9 @@ func ProxyRequestHandler(proxy *httputil.ReverseProxy) func(http.ResponseWriter,
 	}
 }
 
-// Constants
-const CHARGES_BASE_URL = "https://cert.api.fiservapps.com/"
-
-// Globals
-// JTE TODO is there something better to do with these?
-var client *mongo.Client
-var ctx context.Context
-var cancel context.CancelFunc
-var db *mongo.Database
-var txCollection *mongo.Collection
-
 func main() {
 	// initialize a reverse proxy and pass the actual backend server url here
-	proxy, err := NewProxy(CHARGES_BASE_URL) // ("http://localhost:8081")
+	proxy, err := NewProxy(CHARGES_BASE_URL)
 	if err != nil {
 		panic(err)
 	}
