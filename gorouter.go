@@ -20,6 +20,9 @@ import (
 // Constants
 const CHARGES_BASE_URL = "https://cert.api.fiservapps.com/"
 
+// const DB_CONNECTION_STRING = "mongodb://localhost:27017"
+const DB_CONNECTION_STRING = "mongodb+srv://admin:Ngokman3#@cluster0.mce8u.mongodb.net/dstest?retryWrites=true&w=majority"
+
 // Globals
 // JTE TODO is there something better to do with these globals?
 var client *mongo.Client
@@ -194,12 +197,23 @@ func main() {
 	}
 
 	// Initialize database (hardcoded for local machine)
-	client, ctx, cancel, err := connect("mongodb://localhost:27017")
+	// client, ctx, cancel, err := connect("mongodb://localhost:27017")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	panic(err)
+	// }
+	// fmt.Println("Connected to local mongodb")
+	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
+	clientOptions := options.Client().
+		ApplyURI(DB_CONNECTION_STRING).
+		SetServerAPIOptions(serverAPIOptions)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		log.Fatal(err)
 	}
-	fmt.Println("Connected to local mongodb")
+	fmt.Println("x3Connected to mongo at", DB_CONNECTION_STRING)
 
 	// Get target database and collection
 	db = client.Database("dstest")

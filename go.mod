@@ -2,4 +2,7 @@ module githubmain
 
 go 1.13
 
-require go.mongodb.org/mongo-driver v1.9.0 // indirect
+require (
+	github.com/mitchellh/gox v1.0.1 // indirect
+	go.mongodb.org/mongo-driver v1.9.0 // indirect
+)
