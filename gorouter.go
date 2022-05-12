@@ -113,7 +113,7 @@ func recordTransaction(headers http.Header, Url string, status int, request []by
 
 	return nil
 }
-
+ 
 type myTransport struct {
 	// Uncomment this if you want to capture the transport
 	// CapturedTransport http.RoundTripper
