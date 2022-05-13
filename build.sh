@@ -6,4 +6,4 @@ set -xe
 go get
 
 # create the application binary that eb uses
-GOOS=linux GOARCH=amd64 go build -o application -ldflags="-s -w"
+GOOS=linux GOARCH=amd64 go build -o bin/application -ldflags="-s -w"
