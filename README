@@ -1,0 +1,11 @@
+Run Gorouter locally
+
+$ go run gorouter.go
+
+
+Deploy Gorouter to AWS Elastic Beanstalk
+
+$ ./build.sh
+$ zip eb *
+
+Upload the zip file on the AWS EB console at https://us-east-2.console.aws.amazon.com/elasticbeanstalk/home?region=us-east-2#/environment/events?applicationName=go-router&environmentId=e-cvzcgvuzp6

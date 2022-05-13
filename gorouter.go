@@ -213,7 +213,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("x3Connected to mongo at", DB_CONNECTION_STRING)
+	fmt.Println("x4Connected to mongo at", DB_CONNECTION_STRING)
 
 	// Get target database and collection
 	db = client.Database("dstest")
