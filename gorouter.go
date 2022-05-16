@@ -20,6 +20,7 @@ import (
 // Constants
 const CHARGES_BASE_URL = "https://cert.api.fiservapps.com/"
 
+// TODO JTE move connection string credentials into Environment
 // const DB_CONNECTION_STRING = "mongodb://localhost:27017"
 const DB_CONNECTION_STRING = "mongodb+srv://admin:Ngokman3#@cluster0.mce8u.mongodb.net/dstest?retryWrites=true&w=majority"
 
@@ -196,13 +197,6 @@ func main() {
 		panic(err)
 	}
 
-	// Initialize database (hardcoded for local machine)
-	// client, ctx, cancel, err := connect("mongodb://localhost:27017")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	panic(err)
-	// }
-	// fmt.Println("Connected to local mongodb")
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().
 		ApplyURI(DB_CONNECTION_STRING).
