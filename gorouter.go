@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -125,6 +126,13 @@ func (t *myTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	// Get original request from response
 	Url := request.URL.Path
 
+	// JTE added check for presence of body (seems to be failing for healthcheck calls)
+	// TODO JTE add support for "bodyless" requests (GET/DELETE)
+	if request.Body == nil {
+		fmt.Println("Empty request body - ignoring request")
+		return nil, errors.New("Empty request body - ignoring request")
+	}
+
 	requestBytes, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		return nil, err
@@ -221,7 +229,7 @@ func main() {
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "5000"
 		fmt.Printf("defaulting to port %s\n", port)
 	}
 

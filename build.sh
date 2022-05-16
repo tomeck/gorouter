@@ -9,4 +9,5 @@ go get
 GOOS=linux GOARCH=amd64 go build -o bin/application -ldflags="-s -w"
 
 # create the zip file that we'll upload to EB
+rm eb.zip
 zip eb bin/application Procfile
